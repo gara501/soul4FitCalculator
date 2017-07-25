@@ -1,7 +1,7 @@
 Soul4Api
 =========
 
-A small library that do calculations on macros, fat percentage, and fitness tests.
+A small library to generate fitness formulas to calculate different stuff like macronutrients intakes, BMI, fat percentage, cardio levels, etc.
 
 ## Installation
 
@@ -9,20 +9,23 @@ A small library that do calculations on macros, fat percentage, and fitness test
 
 ## Usage
 
-    var s4Api = require('@gara501/soul4api');
+    var fit = require('@gara501/soul4api');
     var weight = 162;
     var height = 6,1;
-    var bodyMassIndex = s4Api.bmi(height, weight);
+    var bmi = fit.bmi(weight, height);
     
  If you want to send values in KG, add a extra parameter at the end of the function
-    var bodyMassIndex = s4Api.bmi(height, weight, 'kg');
+ 
+    var bodyMassIndex = fit.bmi(weight, height, 'kg');
   
-  Output should be {total: 30,49 data: 'overweight'}
+  Output: function returns an object composed of "bmi" and "text"
+    
+    {bmi: 30.49, text: 'overweight'}
 
 
 ## Tests
 
-  `npm test`
+  `npm test` -> Tests will be included in a future version
 
 ## Contributing
 
