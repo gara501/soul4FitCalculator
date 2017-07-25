@@ -1,21 +1,56 @@
 'use strict';
-var math = require('mathjs');
 
-module.exports = {
-  toKg: function(data) {
-    return math.divide(data, 2.2);
-  },
-  toLb: function(data) {
-    return math.divide(data, 0.45359237);
-  },
-  metricUnit: function(data, unity) {
-    if (metricUnit === 'kg') {
-      return toKg(data);
-    } else {
-      return toLb(data);
+module.exports = (function() {
+
+  var _activityIndex = [
+    { id:1, text: 'Sedentary', val: 1.2 },
+    { id:2, text: '< 1 Hour exercise per week', val: 1.375 },
+    { id:3, text: '1 to 3 hours per week', val: 1.55 },
+    { id:4, text: '3 to 6 hours per week', val: 1.725 },
+    { id:5, text: '> 6 hours per week', val: 1.9 }
+  ]; 
+
+  var activityIndex = function(index) {
+   var d = _activityIndex.map(function(item) {
+      if (index === item.id) {
+        console.log('data return', item.id);
+        return item;
+      }
+    }).filter( function(data) {
+      return data != null;
+    });
+    return d;
+  };
+
+  var toKg = function(data) {
+    return {
+      res: (data / 2.2).toFixed(2),
+      text: 'Kg'
     }
-  },
-  bmiText: function(value) {
+  };
+  
+  var toLb = function(data) {
+    return {
+      res: (data * 2.2).toFixed(2),
+      text: 'Lb'
+    }
+  };
+
+  var toIn = function(data) {
+    return {
+      res: (data / 2.54).toFixed(2),
+      text: 'In'
+    }
+  };
+
+  var toCm = function(data) {
+    return {
+      res: (data * 2.54).toFixed(2),
+      text: 'Cm'
+    }
+  };
+  
+  var bmiText = function(value) {
     if (value >= 18.5 && value <= 25) {
       return 'normal';
     } else if (value > 25 && value <= 30) {
@@ -27,16 +62,44 @@ module.exports = {
     } else {
       return 'underweight';
     }
-  },
-  bmi: function(weight, height, unity) {
-    if (unity) {
-      weight = metricUnit(weight, unity);
-      height = metricUnit(height, unity);
+  };
+  
+  var bmi = function(weight, height, unity) {
+    if (unity === 'imperial') {
+      return ((weight / Math.pow(height, 2)) * 703).toFixed(2);
+    } else {
+      return (weight / Math.pow(height, 2)).toFixed(2);
     }
-    var result = math.divide(weight, math.pow(height));
-    return {bmi: result, text: bmiText(result)};
+  };
+  
+  var bmr = function( gender, age, height, weight, unity ) {
+    if (unity == 'imperial') {
+      weight = toKg(weight);
+      height = toCm(height);
+    }
+    if (gender === 1) {
+      return (10 * weight) + (6.25 * height) - (5 * age) + 5;
+    } else {
+      return (10 * weight) + (6.25 * height) - (5 * age) - 161;
+    }
   }
-}
+
+  var tdee = function( gender, age, height, weight, activity, unity ) {
+    var total = bmr(gender, age, height, weight, unity) * activityIndex(activity).val;
+    return total;
+  }
+
+  return {
+    toKg: toKg,
+    toLb: toLb,
+    bmi: bmi,
+    bmr: bmr,
+    toCm: toCm,
+    toIn: toIn,
+    activityIndex: activityIndex,
+    tdee: tdee
+  }
+})();
   
 
   

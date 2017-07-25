@@ -17,10 +17,10 @@
   "author": "Gonzalo Andres Ramirez <gandres.ramirez@gmail.com>",
   "licenses": [
     {
-    "type": "MIT",
-    "url": "https://github.com/brentertz/scapegoat/blob/master/LICENSE-MIT"
+      "type": "MIT",
+      "url": "https://github.com/brentertz/scapegoat/blob/master/LICENSE-MIT"
     }
-  ], 
+  ],
   "bugs": {
     "url": "https://github.com/gara501/soul4api/issues"
   },
@@ -28,5 +28,9 @@
   "devDependencies": {
     "chai": "^4.1.0",
     "mocha": "^3.4.2"
+  },
+  "dependencies": {
+    "math": "0.0.3",
+    "mathjs": "^3.14.2"
   }
 }
