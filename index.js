@@ -13,44 +13,44 @@ module.exports = (function() {
   var activityIndex = function(index) {
    var d = _activityIndex.map(function(item) {
       if (index === item.id) {
-        console.log('data return', item.id);
         return item;
       }
     }).filter( function(data) {
       return data != null;
     });
+    console.log('activity:', d);
     return d;
   };
 
   var toKg = function(data) {
     return {
-      res: (data / 2.2).toFixed(2),
+      total: (data / 2.2).toFixed(2),
       text: 'Kg'
     }
   };
   
   var toLb = function(data) {
     return {
-      res: (data * 2.2).toFixed(2),
+      total: (data * 2.2).toFixed(2),
       text: 'Lb'
     }
   };
 
   var toIn = function(data) {
     return {
-      res: (data / 2.54).toFixed(2),
+      total: (data / 2.54).toFixed(2),
       text: 'In'
     }
   };
 
   var toCm = function(data) {
     return {
-      res: (data * 2.54).toFixed(2),
+      total: (data * 2.54).toFixed(2),
       text: 'Cm'
     }
   };
   
-  var bmiText = function(value) {
+  var _bmiText = function(value) {
     if (value >= 18.5 && value <= 25) {
       return 'normal';
     } else if (value > 25 && value <= 30) {
@@ -64,29 +64,64 @@ module.exports = (function() {
     }
   };
   
-  var bmi = function(weight, height, unity) {
-    if (unity === 'imperial') {
-      return ((weight / Math.pow(height, 2)) * 703).toFixed(2);
+  var bmi = function(data) {
+    var total = '';
+    if (data.unity === 'imperial') {
+      total = ((data.weight / Math.pow(data.height, 2)) * 703).toFixed(2);
     } else {
-      return (weight / Math.pow(height, 2)).toFixed(2);
+      total = (data.weight / Math.pow(data.height, 2)).toFixed(2);
     }
+    return {total: total, text: _bmiText(total)};
   };
   
-  var bmr = function( gender, age, height, weight, unity ) {
-    if (unity == 'imperial') {
-      weight = toKg(weight);
-      height = toCm(height);
+  var bmr = function( data ) {
+    var total = '';
+    var weight = data.weight;
+    var height = data.height;
+    
+    if (unity === 'imperial') {
+      weight = toKg(data.weight);
+      height = toCm(data.height);
     }
-    if (gender === 1) {
-      return (10 * weight) + (6.25 * height) - (5 * age) + 5;
+
+    if (data.gender === 1) {
+      total = (10 * weight) + (6.25 * height) - (5 * data.age) + 5;
     } else {
-      return (10 * weight) + (6.25 * height) - (5 * age) - 161;
+      total = (10 * weight) + (6.25 * height) - (5 * data.age) - 161;
     }
+    return {total: Math.round(total)};
   }
 
-  var tdee = function( gender, age, height, weight, activity, unity ) {
-    var total = bmr(gender, age, height, weight, unity) * activityIndex(activity).val;
-    return total;
+  var tdee = function( data ) {
+    var _bmr = bmr(data.gender, data.age, data.height, data.weight, data.unity);
+    var activityIn = activityIndex(activity);
+    var total = _bmr.total * activityIn[0].val;
+    return {total: Math.round(total)};
+  }
+
+  var idealWeight = function (data) {
+    var height = data.height;
+    var weight = data.weight;
+    var base = 48;
+    var unityW = 2.2;
+    var unityM = 2.7;
+    var total = 0;
+    if (data.unity !== 'imperial') {
+      height = toIn(data.height);
+      base = toLb(base);
+      unityM = toLb(unityM);
+      unityW = toLb(unityW);
+    } else {
+      weight = toKg(data.weight);
+    }
+    var extra = height - 5;
+    if (data.gender === 1) {
+      total = base + (extra * unityW);
+    } else {
+      total = base + (extra * unityM);
+    }
+
+    return {total: total};
   }
 
   return {
@@ -97,7 +132,8 @@ module.exports = (function() {
     toCm: toCm,
     toIn: toIn,
     activityIndex: activityIndex,
-    tdee: tdee
+    tdee: tdee,
+    idealWeight: idealWeight
   }
 })();
   
