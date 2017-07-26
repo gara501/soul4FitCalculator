@@ -99,30 +99,103 @@ module.exports = (function() {
     return {total: Math.round(total)};
   }
 
-  var idealWeight = function (data) {
+  var _idealWeightCore = function(data, formula) {
     var height = data.height;
-    var weight = data.weight;
-    var base = 48;
-    var unityW = 2.2;
-    var unityM = 2.7;
+    var base = 0;
     var total = 0;
+    var delta = 0;
+    var extra = 0;
+    
     if (data.unity !== 'imperial') {
       height = toIn(data.height);
-      base = toLb(base);
-      unityM = toLb(unityM);
-      unityW = toLb(unityW);
-    } else {
-      weight = toKg(data.weight);
+    } 
+
+    if (formula === 'hamwi') {
+      base = 48;
+      delta = data.gender === 1 ? 2.7 : 2.2;
+    } else if (formula === 'devine') {
+      delta = 2.3;
+      base = data.gender === 1 ? 50 : 45.5;
+    } else if (formula === 'robinson') {
+      delta = data.gender === 1 ? 1.9 : 1.7;
+      base = data.gender === 1 ? 52 : 49;
+    } else if (formula === 'miller') {
+      delta = data.gender === 1 ? 1.41 : 1.36;
+      base = data.gender === 1 ? 56.2 : 53.1;
     }
-    var extra = height - 5;
-    if (data.gender === 1) {
-      total = base + (extra * unityW);
-    } else {
-      total = base + (extra * unityM);
+    
+    extra = ((height - 5) * 10) * delta;
+    total = base + extra;
+    return total.toFixed(2);
+  }
+
+  var idealWeight = function (data) {
+
+    var hamwi = _idealWeightCore(data, 'hamwi');
+    var devine = _idealWeightCore(data, 'devine');
+    var robinson = _idealWeightCore(data, 'robinson');
+    var miller = _idealWeightCore(data, 'miller');
+    
+    return { 
+      hamwi: hamwi,
+      devine: devine,
+      robinson: robinson,
+      miller: miller
+     };
+  }
+
+  var _lean = function(data, formula) {
+    
+    var weight = data.unity === 'imperial' ? toKg(data.weight) : data.weight;
+    var height = data.unity === 'imperial' ? toCm(data.height) : data.height;
+    var total = 0;
+    if (formula === 'boer') {
+      var total = data.gender === 1? (((0.407 * weight) + (0.267 * height)) - 19.2) : 
+        (((0.252 * weight) + (0.473 * height)) - 48.3);
+    } else if (formula === 'james') {
+      var total = data.gender === 1? ((1.1 * weight) - (128 * Math.pow((weight / height),2))) : 
+        ((1.07 * weight) - (148 * Math.pow((weight / height),2)));
+    } else if (formula === 'hume') {
+      var total = data.gender === 1? ((0.32810 * weight) + (0.33929 * height)) - 29.5336 : 
+        ((0.29569 * weight) + (0.41813 * height)) - 43.2933;
     }
 
-    return {total: total};
+    return total.toFixed(2);
   }
+
+  var lean = function(data) {
+
+    var boer = _lean(data, 'boer');
+    var james = _lean(data, 'james');
+    var hume = _lean(data, 'hume');
+
+    return {
+      boer: boer,
+      james: james,
+      hume: hume
+    }
+  }
+
+  var fat = function(data) {
+    var total = 0;
+    var delta = data.gender === 1? -98.42: -76.6;
+    var ymca = (delta + (4.15 * data.waist) - (0.082 * data.weight)) / data.weight;
+    
+    
+  /*
+    var delta1 = data.gender === 1 ? Math.log10(data.waist - data.neck): Math.log10(data.waist + data.hip - data.neck);
+    var delta2 = data.gender === 1 ? (0.15456 * Math.log10(data.height)) : (0.22100 * Math.log10(data.height)); 
+    var delta3 = data.gender === 1 ? (1.0324 - ((0.19077 * delta1) + delta2)) : (1.29579 - ((0.35004 * delta1) + delta2)); 
+  */  
+
+    console.log('ymca', ymca);
+
+    
+    
+    return {total: ymca};
+  }
+
+  
 
   return {
     toKg: toKg,
@@ -133,7 +206,9 @@ module.exports = (function() {
     toIn: toIn,
     activityIndex: activityIndex,
     tdee: tdee,
-    idealWeight: idealWeight
+    idealWeight: idealWeight,
+    fat:fat,
+    lean: lean
   }
 })();
   
