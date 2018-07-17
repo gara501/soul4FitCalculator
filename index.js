@@ -4,12 +4,17 @@ module.exports = (function() {
 
   var _activityIndex = [
     { id:1, text: 'Sedentary', val: 1.2 },
-    { id:2, text: '< 1 Hour exercise per week', val: 1.375 },
-    { id:3, text: '1 to 3 hours per week', val: 1.55 },
-    { id:4, text: '3 to 6 hours per week', val: 1.725 },
-    { id:5, text: '> 6 hours per week', val: 1.9 }
-  ]; 
+    { id:2, text: 'Lightly active', val: 1.375 },
+    { id:3, text: 'Moderately active', val: 1.55 },
+    { id:4, text: 'Very active', val: 1.725 },
+    { id:5, text: 'Extremely active', val: 1.9 }
+  ];
 
+  /**
+  * activityIndex: return object with activityIndex
+  * @param {integer} index
+  * @return {object} activityIndex filtered value
+  */
   var activityIndex = function(index) {
    var d = _activityIndex.map(function(item) {
       if (index === item.id) {
@@ -22,6 +27,35 @@ module.exports = (function() {
     return d;
   };
 
+  /**
+  * dce: Daily Caloric Expenditure
+  * @param {object} data object with parameters
+  * @return {decimal} dce calculated value
+  */
+  var dce = function(data) {
+    var dceValue = 0;
+    if (data.unity === 'imperial') {
+      if (data.gender === 'M') {
+        dceValue = data.activityIndex * ((6.25 * data.weight) + (12.7 * data.height) - (6.76 * data.age) + 66);
+      } else {
+        dceValue = data.activityIndex * ((4.35 * data.weight) + (4.7 * data.height) - (4.68 * data.age) + 655);
+      }
+    } else {
+      //Decimal Metric System
+      if (data.gender === 'M') {
+        dceValue = data.activityIndex * ((13.75 * data.weight) + (5 * data.height) - (6.76 * data.age) + 66);
+      } else {
+        dceValue = data.activityIndex * ((9.56 * data.weight) + (1.85 * data.height) - (4.68 * data.age) + 655);
+      }
+    }
+    return dceValue;
+  }
+
+  /**
+  * toKg: Conversion to KG from Pounds
+  * @param {decimal} data value in pounds 
+  * @return {object} Converted value
+  */
   var toKg = function(data) {
     return {
       total: (data / 2.2).toFixed(2),
@@ -29,6 +63,11 @@ module.exports = (function() {
     }
   };
   
+  /**
+  * toLb: Conversion to pounds from KG
+  * @param {decimal} data value in kg 
+  * @return {object} Converted value
+  */
   var toLb = function(data) {
     return {
       total: (data * 2.2).toFixed(2),
@@ -36,6 +75,11 @@ module.exports = (function() {
     }
   };
 
+  /**
+  * toLb: Conversion to Inches from meters
+  * @param {decimal} data value in cm 
+  * @return {object} Converted value
+  */
   var toIn = function(data) {
     return {
       total: (data / 2.54).toFixed(2),
@@ -43,6 +87,11 @@ module.exports = (function() {
     }
   };
 
+  /**
+  * toLb: Conversion to cm from Inches
+  * @param {decimal} data value in Inches 
+  * @return {object} Converted value
+  */
   var toCm = function(data) {
     return {
       total: (data * 2.54).toFixed(2),
