@@ -106,7 +106,7 @@ module.exports = (function() {
  var toImperial = function(data) {
   data.weight = toLb(data.weight).total;
   data.weight = toIn(data.height).total;
-  data.unit = 'I';
+  data.unity = 'I';
   return data;
 };
   
@@ -126,7 +126,7 @@ module.exports = (function() {
   
   var bmi = function(data) {
     var total = '';
-    if (data.unity === 'imperial') {
+    if (data.unity === 'I') {
       total = ((data.weight / Math.pow(data.height, 2)) * 703).toFixed(2);
     } else {
       total = (data.weight / Math.pow(data.height, 2)).toFixed(2);
@@ -139,7 +139,7 @@ module.exports = (function() {
     var weight = data.weight;
     var height = data.height;
     
-    if (unity === 'imperial') {
+    if (unity === 'I') {
       weight = toKg(data.weight);
       height = toCm(data.height);
     }
