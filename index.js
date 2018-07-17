@@ -23,18 +23,17 @@ module.exports = (function() {
     }).filter( function(data) {
       return data != null;
     });
-    console.log('activity:', d);
     return d;
   };
 
   /**
-  * dce: Daily Caloric Expenditure
+  * dce: Daily Caloric Expenditure (Harris Bennedict)
   * @param {object} data object with parameters
   * @return {decimal} dce calculated value
   */
   var dce = function(data) {
     var dceValue = 0;
-    if (data.unity === 'imperial') {
+    if (data.unity === 'I') {
       if (data.gender === 'M') {
         dceValue = data.activityIndex * ((6.25 * data.weight) + (12.7 * data.height) - (6.76 * data.age) + 66);
       } else {
@@ -98,6 +97,18 @@ module.exports = (function() {
       text: 'Cm'
     }
   };
+
+  /**
+  * toImperial: Conversion from metric to Imperial
+  * @param {object} data
+  * @return {object} Converted object
+  */
+ var toImperial = function(data) {
+  data.weight = toLb(data.weight).total;
+  data.weight = toIn(data.height).total;
+  data.unit = 'I';
+  return data;
+};
   
   var _bmiText = function(value) {
     if (value >= 18.5 && value <= 25) {
@@ -155,7 +166,7 @@ module.exports = (function() {
     var delta = 0;
     var extra = 0;
     
-    if (data.unity !== 'imperial') {
+    if (data.unity !== 'I') {
       height = toIn(data.height);
     } 
 
@@ -195,8 +206,8 @@ module.exports = (function() {
 
   var _lean = function(data, formula) {
     
-    var weight = data.unity === 'imperial' ? toKg(data.weight) : data.weight;
-    var height = data.unity === 'imperial' ? toCm(data.height) : data.height;
+    var weight = data.unity === 'I' ? toKg(data.weight) : data.weight;
+    var height = data.unity === 'I' ? toCm(data.height) : data.height;
     var total = 0;
     if (formula === 'boer') {
       var total = data.gender === 1? (((0.407 * weight) + (0.267 * height)) - 19.2) : 
@@ -236,21 +247,16 @@ module.exports = (function() {
     var delta2 = data.gender === 1 ? (0.15456 * Math.log10(data.height)) : (0.22100 * Math.log10(data.height)); 
     var delta3 = data.gender === 1 ? (1.0324 - ((0.19077 * delta1) + delta2)) : (1.29579 - ((0.35004 * delta1) + delta2)); 
   */  
-
-    console.log('ymca', ymca);
-
-    
-    
     return {total: ymca};
   }
-
-  
 
   return {
     toKg: toKg,
     toLb: toLb,
     bmi: bmi,
     bmr: bmr,
+    dce: dce,
+    toImperial: toImperial,
     toCm: toCm,
     toIn: toIn,
     activityIndex: activityIndex,
@@ -260,7 +266,3 @@ module.exports = (function() {
     lean: lean
   }
 })();
-  
-
-  
-  

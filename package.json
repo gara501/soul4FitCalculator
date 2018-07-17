@@ -1,7 +1,7 @@
 {
   "name": "soul4api",
   "version": "0.0.1",
-  "description": "Soul4Fit Macros and Fit Calculations API",
+  "description": "Soul4Fit Fitness formulas and calculations API",
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec"
