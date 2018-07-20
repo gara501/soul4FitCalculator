@@ -1,7 +1,19 @@
 'use strict';
 
 module.exports = (function() {
+  var gender = {
+    male: 'M',
+    female: 'F'
+  };
 
+  var unity = {
+    imperial: 'I',
+    metric: 'M'
+  };
+
+  /**
+  * _activityIndex: Array with activity definitions
+  */
   var _activityIndex = [
     { id:1, text: 'Sedentary', val: 1.2 },
     { id:2, text: 'Lightly active', val: 1.375 },
@@ -9,6 +21,59 @@ module.exports = (function() {
     { id:4, text: 'Very active', val: 1.725 },
     { id:5, text: 'Extremely active', val: 1.9 }
   ];
+
+  /**
+  * rmTable: Array object to calculate 1RM
+  */
+  var _rmData = [
+    { reps:1, rm: 100 },
+    { reps:2, rm: 95 },
+    { reps:3, rm: 93 },
+    { reps:4, rm: 90 },
+    { reps:5, rm: 87 },
+    { reps:6, rm: 85 },
+    { reps:7, rm: 83 },
+    { reps:8, rm: 80 },
+    { reps:9, rm: 77 },
+    { reps:10, rm: 75 },
+    { reps:11, rm: 73 },
+    { reps:12, rm: 70 }
+  ];
+
+  /**
+  * rmTable: Array object to calculate 1RM
+  */
+  var _rmTable = [
+    { weight:0, rm: 100 },
+    { weight:0, rm: 95 },
+    { weight:0, rm: 93 },
+    { weight:0, rm: 90 },
+    { weight:0, rm: 87 },
+    { weight:0, rm: 85 },
+    { weight:0, rm: 83 },
+    { weight:0, rm: 80 },
+    { weight:0, rm: 77 },
+    { weight:0, rm: 75 },
+    { weight:0, rm: 73 },
+    { weight:0, rm: 70 }
+  ];
+
+  /**
+  * _bmiText: Definition of BMI Results
+  */
+  var _bmiText = function(value) {
+    if (value >= 18.5 && value <= 25) {
+      return 'normal';
+    } else if (value > 25 && value <= 30) {
+      return 'overweight';
+    } else if (value > 30 && value <= 40) {
+      return 'obesity';
+    } else if (value > 40) {
+      return 'morbid obesity';
+    } else {
+      return 'underweight';
+    }
+  };
 
   /**
   * activityIndex: return object with activityIndex
@@ -33,15 +98,15 @@ module.exports = (function() {
   */
   var dce = function(data) {
     var dceValue = 0;
-    if (data.unity === 'I') {
-      if (data.gender === 'M') {
+    if (data.unity === unity.imperial) {
+      if (data.gender === gender.male) {
         dceValue = data.activityIndex * ((6.25 * data.weight) + (12.7 * data.height) - (6.76 * data.age) + 66);
       } else {
         dceValue = data.activityIndex * ((4.35 * data.weight) + (4.7 * data.height) - (4.68 * data.age) + 655);
       }
     } else {
       //Decimal Metric System
-      if (data.gender === 'M') {
+      if (data.gender === gender.male) {
         dceValue = data.activityIndex * ((13.75 * data.weight) + (5 * data.height) - (6.76 * data.age) + 66);
       } else {
         dceValue = data.activityIndex * ((9.56 * data.weight) + (1.85 * data.height) - (4.68 * data.age) + 655);
@@ -75,7 +140,7 @@ module.exports = (function() {
   };
 
   /**
-  * toLb: Conversion to Inches from meters
+  * toIn: Conversion to Inches from meters
   * @param {decimal} data value in cm 
   * @return {object} Converted value
   */
@@ -87,7 +152,7 @@ module.exports = (function() {
   };
 
   /**
-  * toLb: Conversion to cm from Inches
+  * toCm: Conversion to cm from Inches
   * @param {decimal} data value in Inches 
   * @return {object} Converted value
   */
@@ -103,30 +168,31 @@ module.exports = (function() {
   * @param {object} data
   * @return {object} Converted object
   */
- var toImperial = function(data) {
-  data.weight = toLb(data.weight).total;
-  data.weight = toIn(data.height).total;
-  data.unity = 'I';
-  return data;
-};
-  
-  var _bmiText = function(value) {
-    if (value >= 18.5 && value <= 25) {
-      return 'normal';
-    } else if (value > 25 && value <= 30) {
-      return 'overweight';
-    } else if (value > 30 && value <= 40) {
-      return 'obesity';
-    } else if (value > 40) {
-      return 'morbid obesity';
-    } else {
-      return 'underweight';
-    }
+  var toImperial = function(data) {
+    data.height = parseFloat(toIn(data.height).total);
+    data.weight = parseFloat(toLb(data.weight).total);
+    return data;
   };
-  
+
+  /**
+  * toMetric: Conversion from imperial to metric
+  * @param {object} data
+  * @return {object} Converted object
+  */
+  var toMetric = function(data) {
+    data.height = parseFloat(toCm(data.height).total);
+    data.weight = parseFloat(toKg(data.weight).total);
+    return data;
+  };
+
+  /**
+  * bmi: Body Mass Index calculation
+  * @param {object} data
+  * @return {object} Converted object
+  */
   var bmi = function(data) {
     var total = '';
-    if (data.unity === 'I') {
+    if (data.unity === unity.imperial) {
       total = ((data.weight / Math.pow(data.height, 2)) * 703).toFixed(2);
     } else {
       total = (data.weight / Math.pow(data.height, 2)).toFixed(2);
@@ -134,22 +200,57 @@ module.exports = (function() {
     return {total: total, text: _bmiText(total)};
   };
   
+  /**
+  * bmr: Basal metabolic rate using Mifflin-St. Jeor equations
+  * @param {object} data
+  * @return {object} Converted object
+  */
   var bmr = function( data ) {
-    var total = '';
+    var total, totalHb = '';
     var weight = data.weight;
     var height = data.height;
-    
-    if (unity === 'I') {
-      weight = toKg(data.weight);
-      height = toCm(data.height);
+
+    if (data.unity === unity.imperial) {
+      data = toMetric(data);
     }
 
-    if (data.gender === 1) {
-      total = (10 * weight) + (6.25 * height) - (5 * data.age) + 5;
+    if (data.gender === gender.male) {
+      total = (10 * data.weight) + (6.25 *  data.height) - (5 * data.age) + 5;
+      totalHb = 66.5 + (13.75 * data.weight) + (5.003 * data.height) - (6.775 * data.age);
     } else {
-      total = (10 * weight) + (6.25 * height) - (5 * data.age) - 161;
+      total = (10 * data.weight) + (6.25 * data.height) - (5 * data.age) - 161;
+      totalHb = 655.1 + (9.563 * data.weight) + (1.85 * data.height) - (4.676 * data.age);
     }
-    return {total: Math.round(total)};
+
+    return {
+      mifflin: Math.round(total),
+      harrisb: Math.round(totalHb)
+    };
+  }
+
+  /**
+  * rpmax: 1 Repetition max
+  * @param {object} data recieves weight and reps
+  * @return {object} Converted object
+  */
+  var rpmax = function( data ) {
+    var rmItem = {};
+    var d = _rmData.map(function(item) {
+      if (item.reps === data.reps) {
+        rmItem.rm = item.rm;
+        rmItem.weight = data.weight;
+      }
+      return rmItem;
+    });
+
+    var oneRm = (rmItem.weight) / (rmItem.rm / 100);
+
+    var rmTableCalc = _rmTable.map(function(item) {
+      item.weight = Math.round(oneRm * (item.rm / 100));
+      return item;
+    });
+
+    return  rmTableCalc;
   }
 
   var tdee = function( data ) {
@@ -166,22 +267,22 @@ module.exports = (function() {
     var delta = 0;
     var extra = 0;
     
-    if (data.unity !== 'I') {
+    if (data.unity !== unity.imperial) {
       height = toIn(data.height);
     } 
 
     if (formula === 'hamwi') {
       base = 48;
-      delta = data.gender === 1 ? 2.7 : 2.2;
+      delta = data.gender === gender.male ? 2.7 : 2.2;
     } else if (formula === 'devine') {
       delta = 2.3;
-      base = data.gender === 1 ? 50 : 45.5;
+      base = data.gender === gender.male ? 50 : 45.5;
     } else if (formula === 'robinson') {
-      delta = data.gender === 1 ? 1.9 : 1.7;
-      base = data.gender === 1 ? 52 : 49;
+      delta = data.gender === gender.male ? 1.9 : 1.7;
+      base = data.gender === gender.male ? 52 : 49;
     } else if (formula === 'miller') {
-      delta = data.gender === 1 ? 1.41 : 1.36;
-      base = data.gender === 1 ? 56.2 : 53.1;
+      delta = data.gender === gender.male ? 1.41 : 1.36;
+      base = data.gender === gender.male ? 56.2 : 53.1;
     }
     
     extra = ((height - 5) * 10) * delta;
@@ -206,17 +307,17 @@ module.exports = (function() {
 
   var _lean = function(data, formula) {
     
-    var weight = data.unity === 'I' ? toKg(data.weight) : data.weight;
-    var height = data.unity === 'I' ? toCm(data.height) : data.height;
+    var weight = data.unity === unity.imperial ? toKg(data.weight) : data.weight;
+    var height = data.unity === unity.imperial ? toCm(data.height) : data.height;
     var total = 0;
     if (formula === 'boer') {
-      var total = data.gender === 1? (((0.407 * weight) + (0.267 * height)) - 19.2) : 
+      var total = data.gender === gender.male? (((0.407 * weight) + (0.267 * height)) - 19.2) : 
         (((0.252 * weight) + (0.473 * height)) - 48.3);
     } else if (formula === 'james') {
-      var total = data.gender === 1? ((1.1 * weight) - (128 * Math.pow((weight / height),2))) : 
+      var total = data.gender === gender.male? ((1.1 * weight) - (128 * Math.pow((weight / height),2))) : 
         ((1.07 * weight) - (148 * Math.pow((weight / height),2)));
     } else if (formula === 'hume') {
-      var total = data.gender === 1? ((0.32810 * weight) + (0.33929 * height)) - 29.5336 : 
+      var total = data.gender === gender.male? ((0.32810 * weight) + (0.33929 * height)) - 29.5336 : 
         ((0.29569 * weight) + (0.41813 * height)) - 43.2933;
     }
 
@@ -238,7 +339,7 @@ module.exports = (function() {
 
   var fat = function(data) {
     var total = 0;
-    var delta = data.gender === 1? -98.42: -76.6;
+    var delta = data.gender === gender.male? -98.42: -76.6;
     var ymca = (delta + (4.15 * data.waist) - (0.082 * data.weight)) / data.weight;
     
     
@@ -256,6 +357,7 @@ module.exports = (function() {
     bmi: bmi,
     bmr: bmr,
     dce: dce,
+    rpmax: rpmax,
     toImperial: toImperial,
     toCm: toCm,
     toIn: toIn,
