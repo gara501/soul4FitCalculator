@@ -4,7 +4,7 @@
   "description": "Soul4Fit Fitness formulas and calculations API",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter spec"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/gara501/soul4api#readme",
   "devDependencies": {
-    "chai": "^4.1.0",
-    "mocha": "^3.4.2"
+    "jest": "^25.1.0"
   }
 }

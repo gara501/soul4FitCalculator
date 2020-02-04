@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (function() {
+module.exports = (() => { 
   // Constants
   const gender = {
     MALE: 'M',
@@ -99,21 +99,12 @@ module.exports = (function() {
     }
   ];
 
-  // Base object
-  let userData = {
-    age: 0,
-    gender: '',
-    height: 0,
-    weight: 0,
-    unity: ''
-  }
-
    /**
-   * Ideal Body Fat Percentaje by age
-   * @param {decimal, string} bodyFatPercentage, gender
+   * Ideal Body Fat percentage by age
+   * @param {integer, string} userAge, userGender
    * @returns {string} idealBf;
   */
-  const _idealBodyfatRange = (bodyfatPercentaje, gender) => {
+  const _idealBodyfatRange = (userAge, userGender) => {
     let isAgeRange = 0;
     let idealBf = 0;
     let arrayFemale = [];
@@ -128,8 +119,8 @@ module.exports = (function() {
     }
 
     if (gender === gender.FEMALE) {
-      for (item2 of arrayFemale) {
-        if (bodyfatPercentaje >= item2.age) {
+      for (item2 of arrayFemale[0]) {
+        if (userAge >= item2.age) {
           if (item2.age > isAgeRange){
               isAgeRange = item2.age;
               idealBf = item2.percentage;
@@ -138,10 +129,10 @@ module.exports = (function() {
       }
     }
 
-    if (gender === gender.MALE) {
-      for (item2 of arrayMale) {
-        if (bodyfatPercentaje >= item2.age) {
-          if (item2.age > isAgeRange){
+    if (userGender === gender.MALE) {
+      for (item2 of arrayMale[0]) {
+        if (userAge >= item2.age) {
+          if (item2.age > isAgeRange) {
               isAgeRange = item2.age;
               idealBf = item2.percentage;
           }
@@ -157,32 +148,41 @@ module.exports = (function() {
    * @param {decimal, string} bodyFatPercentage, gender
    * @returns {string} categorization;
   */
- const _aceBodyFatCategorization = (bodyfatPercentaje, gender) => {
+ const _aceBodyFatCategorization = (bodyfatPercentage, gender) => {
   let isCategorizationRange = 0;
-  let categorization = 0;
+  let arrayFemale = [];
+  let arrayMale = [];
+
   for ( item in AceBodyFatCategorization) {
-    if (gender === item.FEMALE) {
-      for (item2 of AceBodyFatCategorization[item]){
-        if (bodyfatPercentaje >= item2.value) {
-            if (item2.value > isCategorizationRange){
-                isCategorizationRange = item2.value;
-                categorization = item2.percentage;
-            }
-        }
-      }
+    if (item ===  'FEMALE') {
+      arrayFemale.push(AceBodyFatCategorization[item])
     } else {
-      for (item2 of AceBodyFatCategorization[item]){
-        if (bodyfatPercentaje >= item2.value) {
-            if (item2.value > isCategorizationRange){
-                isCategorizationRange = item2.value;
-                categorization = item2.percentage;
-            }
+      arrayMale.push(AceBodyFatCategorization[item])
+    }
+  }
+
+  if (userGender === gender.FEMALE) {
+    for (item2 of arrayFemale[0]) {
+      if (bodyfatPercentage >= item2.value) {
+        if (item2.value > isCategorizationRange){
+            isCategorizationRange = item2.value;
+            idealBf = item2.name;
         }
       }
     }
-    
-  return categorization;
   }
+
+  if (userGender === gender.MALE) {
+    for (item2 of arrayMale[0]) {
+      if (bodyfatPercentage >= item2.value) {
+        if (item2.value > isCategorizationRange){
+            isCategorizationRange = item2.value;
+            idealBf = item2.name;
+        }
+      }
+    }
+  }
+  return idealBf;
 }
 
   // RM calculations
@@ -192,7 +192,7 @@ module.exports = (function() {
    * @param {reps, weight} value repetitions and weight
    * @returns rmWeight 
   */
-  const _epleyWeldayRm = (reps, weight) => {
+  const epleyWeldayRm = (reps, weight) => {
     const rmWeight = weight + (1 + (0.033 * reps));
     return Math.round(rmWeight);
   }
@@ -202,8 +202,8 @@ module.exports = (function() {
    * @param {reps, weight} value repetitions and weight 
    * @returns rmWeight 
   */
-  const _landerRm = (reps, weight) => {
-    const rmWeight = (100 * weight) / 101.3 - (2.67123 * reps);
+  const landerRm = (reps, weight) => {
+    const rmWeight = weight / (1.013 - (0.0267123 * reps));
     return Math.round(rmWeight);
   }
 
@@ -212,7 +212,7 @@ module.exports = (function() {
    * @param {reps, weight} value repetitions and weight 
    * @returns rmWeight 
   */
-  const _oConnorRm = (reps, weight) => {
+  const oConnorRm = (reps, weight) => {
     const rmWeight = weight * Math.pow(reps, 0.10)
     return Math.round(rmWeight);
   }
@@ -222,7 +222,7 @@ module.exports = (function() {
    * @param {reps, weight} value repetitions and weight 
    * @returns rmWeight 
   */
-  const _lombardiRm = (reps, weight) => {
+  const lombardiRm = (reps, weight) => {
     const rmWeight = (100 * weight) / (52.2+41.9 * Math.exp(-0.055*reps))
     return Math.round(rmWeight);
   }
@@ -232,8 +232,8 @@ module.exports = (function() {
    * @param {reps, weight} value repetitions and weight 
    * @returns rmWeight 
   */
-  const _brzyckiRm = (reps, weight) => {
-    const rmWeight = weight / 1.0278 - (0.0278 * reps)
+  const brzyckiRm = (reps, weight) => {
+    const rmWeight = weight / (1.0278 - (0.0278 * reps));
     return Math.round(rmWeight);
   }
 
@@ -242,8 +242,8 @@ module.exports = (function() {
    * @param {reps, weight} value repetitions and weight 
    * @returns rmWeight 
   */
-  const _abadieRm = (reps, weight) => {
-    const rmWeight = (weight + reps) / (8.841 + (1.1828*reps));
+  const abadieRm = (reps, weight) => {
+    const rmWeight = weight + reps / 8.841 + (1.1828*reps);
     return Math.round(rmWeight);
   }
 
@@ -253,7 +253,7 @@ module.exports = (function() {
    * @param {reps, weight} value repetitions and weight 
    * @returns rmWeight 
   */
-  const _wathenRm = (reps, weight) => {
+  const wathenRm = (reps, weight) => {
     const rmWeight = weight / ((48.8 + (53.8 * Math.exp(-0.075 * reps))) / 100);
     return Math.round(rmWeight);
   }
@@ -263,8 +263,8 @@ module.exports = (function() {
    * @param {reps, weight} value repetitions and weight 
    * @returns rmWeight 
   */
-  const _bergerRm = (reps, weight) => {
-    const rmWeight = reps + weight / (1.0261 * Math.exp(-0.00262*reps));
+  const bergerRm = (reps, weight) => {
+    const rmWeight = (weight * reps * 0.03) + weight;
     return Math.round(rmWeight);
   }
 
@@ -273,7 +273,7 @@ module.exports = (function() {
    * @param {reps, weight} value repetitions and weight 
    * @returns rmWeight 
   */
-  const _mayhewRm = (reps, weight) => {
+  const mayhewRm = (reps, weight) => {
     const rmWeight = weight / ((52.2 + (41.9 * Math.exp(-0.055 * reps))) / 100);
     return Math.round(rmWeight);
   }
@@ -614,6 +614,15 @@ module.exports = (function() {
     unity,
     toKg,
     toLb,
+    epleyWeldayRm,
+    landerRm,
+    oConnorRm,
+    lombardiRm,
+    brzyckiRm,
+    abadieRm,
+    wathenRm,
+    bergerRm,
+    mayhewRm,
     bodyMassIndex,
     basalMetabolicRate,
     dailyCaloricExpenditure,
@@ -623,8 +632,6 @@ module.exports = (function() {
     activityIndex,
     totalDailyEnergyExpenditure,
     idealWeight,
-    lean,
-    fat,
     JacksonPollardBodyFat
   }
 })();
