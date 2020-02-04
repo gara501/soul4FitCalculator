@@ -28,9 +28,5 @@
   "devDependencies": {
     "chai": "^4.1.0",
     "mocha": "^3.4.2"
-  },
-  "dependencies": {
-    "math": "0.0.3",
-    "mathjs": "^3.14.2"
   }
 }
