@@ -610,7 +610,8 @@ module.exports = (function() {
   }
 
   return {
-    userData,
+    gender,
+    unity,
     toKg,
     toLb,
     bodyMassIndex,
